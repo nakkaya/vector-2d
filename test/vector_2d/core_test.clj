@@ -45,4 +45,6 @@
     (is (= false (in-view-cone? (vector-2d 1 3) 
 				(vector-2d 1 1) 71 (vector-2d 3 2))))
     (is (= true (in-view-cone? (vector-2d 1 3) 
-			       (vector-2d 1 1) 74 (vector-2d 3 2))))))
+			       (vector-2d 1 1) 74 (vector-2d 3 2))))
+    (is (= true (point-in-circle? (vector-2d 1 1) (vector-2d 0 0) 10)))
+    (is (= false (point-in-circle? (vector-2d 11 11) (vector-2d 0 0) 10)))))

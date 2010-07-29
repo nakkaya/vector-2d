@@ -124,3 +124,11 @@
 	distance (magnitude (ga/- c closest))]
     (if (<= distance r)
       true false)))
+
+(defn point-in-circle? 
+  "Test if point a falls within the circle c with radius r."
+  [a c r]
+  (let [[ax ay] (vals a)
+	[cx cy] (vals c)] 
+    (gc/< (+ (Math/pow (- cx ax) 2) (Math/pow (- cy ay) 2)) 
+	  (Math/pow r 2))))
