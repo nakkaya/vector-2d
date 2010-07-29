@@ -39,6 +39,7 @@ Collection of 2D Vector Operations.
  -  perpendicular?  -  Returns true if vectors are perpendicular to each other.
  -  vector-2d-struct  -  nil
  -  bisect-angle  -  Returns the vector that lies halfway between vectors.
+ -  point-in-circle? - Test if point a falls within the circle c with radius r.
 
 ## License
 
