@@ -1,4 +1,5 @@
 (ns vector-2d.core
+  (:refer-clojure :exclude [deftype])
   (:use [clojure.contrib.types :only (deftype)]
 	[clojure.contrib.generic :only (root-type)])
   (:require [clojure.contrib.generic.arithmetic :as ga]
