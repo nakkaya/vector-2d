@@ -34,12 +34,12 @@ Collection of 2D Vector Operations.
  -  normalize  -  Returns the unit vector of the supplied vector.
  -  negative  -  Return a new vector in the opposite direction.
  -  rotate  -  See, http://en.wikipedia.org/wiki/Rotation_(mathematics)
- -  vector-2d  -  nil
  -  dot-product  -  See, http://en.wikipedia.org/wiki/Dot_product
  -  perpendicular?  -  Returns true if vectors are perpendicular to each other.
  -  vector-2d-struct  -  nil
  -  bisect-angle  -  Returns the vector that lies halfway between vectors.
  -  point-in-circle? - Test if point a falls within the circle c with radius r.
+ -  bearing - Direction of u with respect to v.
 
 ## License
 

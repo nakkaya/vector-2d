@@ -133,3 +133,12 @@
 	[cx cy] (vals c)] 
     (gc/< (+ (Math/pow (- cx ax) 2) (Math/pow (- cy ay) 2)) 
 	  (Math/pow r 2))))
+
+(defn bearing 
+  "Direction of u with respect to v."
+  [u v]
+  (let [[ux uy] (vals u) [vx vy] (vals v)
+	ang (- (/ Math/PI 2) (Math/atan2 (- uy vy) (- ux vx)))] 
+    (cond (> ang Math/PI) (- ang (* 2 Math/PI))
+	  (< ang (- Math/PI)) (+ ang (* 2 Math/PI))
+	  :else ang)))
