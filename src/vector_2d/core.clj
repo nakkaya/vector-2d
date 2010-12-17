@@ -5,10 +5,19 @@
   (:require [clojure.contrib.generic.arithmetic :as ga]
 	    [clojure.contrib.generic.comparison :as gc]))
 
-(defstruct vector-2d-struct :x :y)
+(defn- to-polar [x y]
+  [(Math/sqrt (+ (* x x) (* y y))) (Math/atan2 y x)])
+
+(defn- to-cartesian [r t]
+  [(* r (Math/cos t)) (* r (Math/sin t))])
+
+(defstruct vector-2d-struct :x :y :r :t)
 
 (deftype ::vector-2d vector-2d
-  (fn [x y] (struct vector-2d-struct x y))
+  (fn [x y & polar?] 
+    (if (nil? polar?)
+      (apply struct (concat [vector-2d-struct x y] (to-polar x y)))
+      (apply struct (concat [vector-2d-struct] (to-cartesian x y) [x y]))))
   (fn [v] (vals v)))
 
 (derive ::vector-2d root-type)
@@ -45,8 +54,8 @@
 (defn magnitude 
   "Return the length of the vector."
   [v]
-  (let [[x y] (vals v)] 
-    (Math/sqrt (+ (* x x) (* y y)))))
+  (let [[x y r t] (vals v)] 
+    r))
 
 (defn dist 
   "Return the distance between two vectors."
