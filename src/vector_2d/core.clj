@@ -1,7 +1,8 @@
 (ns vector-2d.core
   (:refer-clojure :exclude [deftype])
   (:use [clojure.contrib.types :only (deftype)]
-	[clojure.contrib.generic :only (root-type)])
+	[clojure.contrib.generic :only (root-type)]
+        [clojure.contrib.seq-utils :only (find-first)])
   (:require [clojure.contrib.generic.arithmetic :as ga]
 	    [clojure.contrib.generic.comparison :as gc]))
 
@@ -151,3 +152,21 @@
     (cond (> ang Math/PI) (- ang (* 2 Math/PI))
 	  (< ang (- Math/PI)) (+ ang (* 2 Math/PI))
 	  :else ang)))
+
+(defn octant
+  "Provides info on which octant (1-8) the vector lies in."
+  [u]
+  (let [[x y r t] (vals u)
+        angle (let [a (Math/toDegrees t)]
+                (if (< a 0) (+ 360 a) a))
+        bounds [[1 45] [2 90] [3 135] [4 180] [5 225] [6 270] [7 315] [8 360]]]
+    (first (find-first #(< angle (second %)) bounds))))
+
+(defn quadrant
+  "Provides info on which quadrant (1-4) the vector lies in."
+  [u]
+  (let [[x y r t] (vals u)
+        angle (let [a (Math/toDegrees t)]
+                (if (< a 0) (+ 360 a) a))
+        bounds [[1 90] [2 180] [3 270] [4 360]]]
+    (first (find-first #(< angle (second %)) bounds))))
