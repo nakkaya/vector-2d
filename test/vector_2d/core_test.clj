@@ -50,4 +50,5 @@
     (is (= false (point-in-circle? (vector-2d 11 11) (vector-2d 0 0) 10)))
     (is (= 180 (Math/toDegrees (bearing (vector-2d 0 0) (vector-2d 0 2)))))
     (is (= -135 (Math/toDegrees 
-		 (bearing (vector-2d 0 0) (vector-2d 1 1)))))))
+		 (bearing (vector-2d 0 0) (vector-2d 1 1)))))
+    (is (= (vector-2d 1 0) (closest-point-on-circle (vector-2d 2 0) (vector-2d 0 0) 1)))))

@@ -127,6 +127,11 @@
 	  (> proj-mag (magnitude ab)) b
 	  :default (ga/+ (project ac ab) a))))
 
+(defn closest-point-on-circle [p c r]
+  (let [v (ga/- p c)]
+    (ga/* (ga/+ c v)
+          (/ 1 (ga/* (magnitude v) r)))))
+
 (defn line-circle-collision 
   "Given line segment AB and circle C with radius R, returns true if 
    circle collides with the line segmen."
