@@ -128,9 +128,8 @@
 	  :default (ga/+ (project ac ab) a))))
 
 (defn closest-point-on-circle [p c r]
-  (let [v (ga/- p c)]
-    (ga/* (ga/+ c v)
-          (/ 1 (ga/* (magnitude v) r)))))
+  (let [v (normalize (ga/- p c))]
+    (ga/+ c (ga/* v r))))
 
 (defn line-circle-collision 
   "Given line segment AB and circle C with radius R, returns true if 
