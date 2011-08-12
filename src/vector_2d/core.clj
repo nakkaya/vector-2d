@@ -174,3 +174,68 @@
                 (if (< a 0) (+ 360 a) a))
         bounds [[1 90] [2 180] [3 270] [4 360]]]
     (first (find-first #(< angle (second %)) bounds))))
+
+(defn distance-behind-line
+  "Given line ab calculate a point c, d distance behind a."
+  [a b d]
+  (let [b (ga/- b a)]
+    (ga/+ a (vector-2d (- d) (:t b) :polar))))
+
+(defn circle-circle-collision
+  "Given two circles c1 with radius r1 and c2 with radius r2, return true if circles collide."
+  [c1 r1 c2 r2]
+  (<= (dist c1 c2) (Math/sqrt (Math/pow (+ r1 r2) 2))))
+
+(defn line-intersection
+  "Given two line segments ab and cd returns the intersection point if they intersect otherwise nil.
+   http://paulbourke.net/geometry/lineline2d/"
+  [{x1 :x y1 :y} {x2 :x y2 :y} {x3 :x y3 :y} {x4 :x y4 :y}]
+  (when (and (not= (vector-2d x1 y1) (vector-2d x2 y2))
+             (not= (vector-2d x3 y3) (vector-2d x4 y4)))
+    
+    (let [ua (/ (- (* (- x4 x3) (- y1 y3))
+                   (* (- y4 y3) (- x1 x3)))
+                
+                (- (* (- y4 y3) (- x2 x1))
+                   (* (- x4 x3) (- y2 y1))))
+          
+          ub (/ (- (* (- x2 x1) (- y1 y3))
+                   (* (- y2 y1) (- x1 x3)))
+                
+                (- (* (- y4 y3) (- x2 x1))
+                   (* (- x4 x3) (- y2 y1))))]
+      
+      (when (and (>= ua 0)
+                 (<= ua 1)
+                 (>= ub 0)
+                 (<= ub 1))
+        
+        (vector-2d (+ x1 (* ua (- x2 x1)))
+                   (+ y1 (* ua (- y2 y1))))))))
+
+(defn- in-range? [x a b]
+  (cond (< x a) false
+        (> x b) false
+        :else true))
+
+(defn point-in-rectangle
+  "Given corners of a rectangle a,b,c,d and a point p,
+   returns true if p in the rectangle,"
+  [a b c d p]
+  (let [min-x (apply min (map #(:x %) [a b c d]))
+        max-x (apply max (map #(:x %) [a b c d]))
+        min-y (apply min (map #(:y %) [a b c d]))
+        max-y (apply max (map #(:y %) [a b c d]))]
+    (and (in-range? (:x p) min-x max-y)
+         (in-range? (:y p) min-y max-y))))
+
+(defn rectangle-circle-collision
+  "Given corners of a rectangle a,b,c,d and a circle with
+   center cc with radius r return true if circle collides with the
+   rectangle."
+  [[a b c d] cc r]
+  (or (point-in-rectangle a b c d cc)
+      (line-circle-collision a b cc r)
+      (line-circle-collision b c cc r)
+      (line-circle-collision c d cc r)
+      (line-circle-collision d a cc r)))

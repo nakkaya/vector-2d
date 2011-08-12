@@ -51,4 +51,21 @@
     (is (= 180 (Math/toDegrees (bearing (vector-2d 0 0) (vector-2d 0 2)))))
     (is (= -135 (Math/toDegrees 
 		 (bearing (vector-2d 0 0) (vector-2d 1 1)))))
-    (is (= (vector-2d 1 0) (closest-point-on-circle (vector-2d 2 0) (vector-2d 0 0) 1)))))
+    (is (= (vector-2d 1 0) (closest-point-on-circle (vector-2d 2 0) (vector-2d 0 0) 1)))
+    (is (= (vector-2d -10 0) (distance-behind-line (vector-2d 0 0) (vector-2d 10 0) 10)))
+    (is (= true (circle-circle-collision (vector-2d 0 0) 10 (vector-2d 10 0) 10)))
+    (is (= false (circle-circle-collision (vector-2d 0 0) 10 (vector-2d 21 0) 10)))
+    (is (= (vector-2d 0 0) (line-intersection (vector-2d -10 0) (vector-2d 10 0)
+                                              (vector-2d 0 -10) (vector-2d 0 10))))
+    (is (= true (point-in-rectangle
+                 (vector-2d -10 10) (vector-2d 10 10)
+                 (vector-2d -10 -10) (vector-2d 10 -10)
+                 (vector-2d 0 0))))
+    (is (= true (rectangle-circle-collision
+                 [(vector-2d -10 10) (vector-2d 10 10)
+                  (vector-2d -10 -10) (vector-2d 10 -10)]
+                 (vector-2d 0 0) 10)))
+    (is (= false (rectangle-circle-collision
+                  [(vector-2d -10 10) (vector-2d 10 10)
+                   (vector-2d -10 -10) (vector-2d 10 -10)]
+                  (vector-2d 20 20) 10)))))

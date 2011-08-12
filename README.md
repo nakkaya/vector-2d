@@ -23,23 +23,31 @@ Collection of 2D Vector Operations.
 
 ## Contains
 
- -  closest-point-on-line  -  Calculate a point on the line AB that is closest to point C.
- -  in-view-cone?  -  Checks if the point is in viewing cone.
- -  dist  -  Return the distance between two vectors.
- -  project  -  See, http://en.wikipedia.org/wiki/Vector_projection
- -  parallel?  -  Returns true if vectors are parallel to each other.
- -  line-circle-collision  -  Given line segment AB and circle C with radius R, returns true if 
-   circle collides with the line segmen.
- -  magnitude  -  Return the length of the vector.
- -  normalize  -  Returns the unit vector of the supplied vector.
- -  negative  -  Return a new vector in the opposite direction.
- -  rotate  -  See, http://en.wikipedia.org/wiki/Rotation_(mathematics)
- -  dot-product  -  See, http://en.wikipedia.org/wiki/Dot_product
- -  perpendicular?  -  Returns true if vectors are perpendicular to each other.
- -  vector-2d-struct  -  nil
- -  bisect-angle  -  Returns the vector that lies halfway between vectors.
- -  point-in-circle? - Test if point a falls within the circle c with radius r.
- -  bearing - Direction of u with respect to v.
+ -  distance-behind-line
+ -  quadrant
+ -  closest-point-on-line
+ -  in-view-cone?
+ -  dist
+ -  point-in-circle?
+ -  project
+ -  parallel?
+ -  bearing
+ -  line-circle-collision
+ -  line-intersection
+ -  magnitude
+ -  octant
+ -  rectangle-circle-collision
+ -  closest-point-on-circle
+ -  normalize
+ -  negative
+ -  rotate
+ -  vector-2d
+ -  point-in-rectangle
+ -  dot-product
+ -  perpendicular?
+ -  vector-2d-struct
+ -  bisect-angle
+ -  circle-circle-collision
 
 ## License
 
