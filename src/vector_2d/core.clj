@@ -68,7 +68,7 @@
   [v]
   (let [[x y] (vals v)
 	mag (magnitude v)] 
-    (if-not (= mag 0)
+    (if-not (== mag 0)
       (vector-2d (/ x mag) (/ y mag)) (vector-2d 0 0))))
 
 (defn dot-product 
