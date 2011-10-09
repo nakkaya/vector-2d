@@ -6,76 +6,68 @@
   (:require [clojure.contrib.generic.arithmetic :as ga]
 	    [clojure.contrib.generic.comparison :as gc]))
 
-(defn- to-polar [x y]
-  [(Math/sqrt (+ (* x x) (* y y))) (Math/atan2 y x)])
-
-(defn- to-cartesian [r t]
-  [(* r (Math/cos t)) (* r (Math/sin t))])
-
-(defstruct vector-2d-struct :x :y :r :t)
+(defstruct vector-2d-struct :x :y)
 
 (deftype ::vector-2d vector-2d
-  (fn [x y & polar?] 
-    (if (nil? polar?)
-      (apply struct (concat [vector-2d-struct x y] (to-polar x y)))
-      (apply struct (concat [vector-2d-struct] (to-cartesian x y) [x y]))))
-  (fn [v] (vals v)))
+  (fn [x y] (struct vector-2d-struct x y))
+  (fn [{x :x y :y}] (vector-2d x y)))
 
 (derive ::vector-2d root-type)
 
+(defn to-polar [{x :x y :y}]
+  {:r (Math/sqrt (+ (* x x) (* y y))) :t (Math/atan2 y x)})
+
+(defn to-cartesian [r t]
+  (vector-2d (* r (Math/cos t)) (* r (Math/sin t))))
+
 (defmethod ga/+ [::vector-2d ::vector-2d]
-  [u v]
-  (let [[ux uy] (vals u)
-	[vx vy] (vals v)]
-    (vector-2d (ga/+ ux vx) (ga/+ uy vy))))
+  [{ux :x uy :y} {vx :x vy :y}]
+  (vector-2d (ga/+ ux vx) (ga/+ uy vy)))
 
 (defmethod ga/- [::vector-2d ::vector-2d]
-  [u v]
-  (let [[ux uy] (vals u)
-	[vx vy] (vals v)]
-    (vector-2d (ga/- ux vx) (ga/- uy vy))))
+  [{ux :x uy :y} {vx :x vy :y}]
+  (vector-2d (ga/- ux vx) (ga/- uy vy)))
 
 (defmethod ga/* [::vector-2d Object]
-  [u s]
-  (let [[ux uy] (vals u)]
-    (vector-2d (* ux s) (* uy s))))
+  [{ux :x uy :y} s]
+  (vector-2d (* ux s) (* uy s)))
 
 (defmethod gc/= [::vector-2d ::vector-2d]
-  [u v]
-  (let [[ux uy] (vals u)
-	[vx vy] (vals v)]
-    (and (gc/= ux vx) (gc/= uy vy))))
+  [{ux :x uy :y} {vx :x vy :y}]
+  (and (gc/= ux vx) (gc/= uy vy)))
 
 (defn negative 
   "Return a new vector in the opposite direction."
-  [u]
-  (let [[ux uy] (vals u)] 
-    (vector-2d (- ux) (- uy))))
+  [{ux :x uy :y}]
+  (vector-2d (- ux) (- uy)))
 
 (defn magnitude 
   "Return the length of the vector."
-  [v]
-  (let [[x y r t] (vals v)] 
-    r))
+  [{x :x y :y}]
+  (Math/sqrt (+ (* x x) (* y y))))
 
 (defn dist 
   "Return the distance between two vectors."
   [u v]
   (magnitude (ga/- u v)))
 
+(defn dist-manhattan
+  "Return the manhattan distance between two vectors."
+  [{x1 :x y1 :y} {x2 :x y2 :y}]
+  (+ (Math/abs (- x2 x1)) (Math/abs (- y2 y1))))
+
 (defn normalize 
   "Returns the unit vector of the supplied vector."
   [v]
-  (let [[x y] (vals v)
+  (let [{:keys [x y]} v
 	mag (magnitude v)] 
     (if-not (== mag 0)
       (vector-2d (/ x mag) (/ y mag)) (vector-2d 0 0))))
 
 (defn dot-product 
   "See, http://en.wikipedia.org/wiki/Dot_product"
-  [u v]
-  (let [[ux uy] (vals u) [vx vy] (vals v)] 
-    (+ (* ux vx) (* uy vy))))
+  [{ux :x uy :y} {vx :x vy :y}]
+  (+ (* ux vx) (* uy vy)))
 
 (defn project 
   "See, http://en.wikipedia.org/wiki/Vector_projection"
@@ -86,9 +78,8 @@
 
 (defn rotate 
   "See, http://en.wikipedia.org/wiki/Rotation_(mathematics)"
-  [u angle]
-  (let [[ux uy] (vals u)
-	s (Math/sin (Math/toRadians angle))
+  [{ux :x uy :y} angle]
+  (let [s (Math/sin (Math/toRadians angle))
 	c (Math/cos (Math/toRadians angle))]
     (vector-2d (- (ga/* c ux) (ga/* s uy)) 
 	       (+ (ga/* s ux) (ga/* c uy)))))
@@ -142,17 +133,13 @@
 
 (defn point-in-circle? 
   "Test if point a falls within the circle c with radius r."
-  [a c r]
-  (let [[ax ay] (vals a)
-	[cx cy] (vals c)] 
-    (gc/< (+ (Math/pow (- cx ax) 2) (Math/pow (- cy ay) 2)) 
-	  (Math/pow r 2))))
+  [{ax :x ay :y} {cx :x cy :y} r]
+  (gc/< (+ (Math/pow (- cx ax) 2) (Math/pow (- cy ay) 2)) (Math/pow r 2)))
 
 (defn bearing 
   "Direction of u with respect to v."
-  [u v]
-  (let [[ux uy] (vals u) [vx vy] (vals v)
-	ang (- (/ Math/PI 2) (Math/atan2 (- uy vy) (- ux vx)))] 
+  [{ux :x uy :y} {vx :x vy :y}]
+  (let [ang (- (/ Math/PI 2) (Math/atan2 (- uy vy) (- ux vx)))] 
     (cond (> ang Math/PI) (- ang (* 2 Math/PI))
 	  (< ang (- Math/PI)) (+ ang (* 2 Math/PI))
 	  :else ang)))
@@ -160,7 +147,8 @@
 (defn octant
   "Provides info on which octant (1-8) the vector lies in."
   [u]
-  (let [[x y r t] (vals u)
+  (let [{:keys [x y]} u
+        {:keys [r t]} (to-polar u)
         angle (let [a (Math/toDegrees t)]
                 (if (< a 0) (+ 360 a) a))
         bounds [[1 45] [2 90] [3 135] [4 180] [5 225] [6 270] [7 315] [8 360]]]
@@ -169,7 +157,8 @@
 (defn quadrant
   "Provides info on which quadrant (1-4) the vector lies in."
   [u]
-  (let [[x y r t] (vals u)
+  (let [{:keys [x y]} u
+        {:keys [r t]} (to-polar u)
         angle (let [a (Math/toDegrees t)]
                 (if (< a 0) (+ 360 a) a))
         bounds [[1 90] [2 180] [3 270] [4 360]]]
@@ -178,8 +167,9 @@
 (defn distance-behind-line
   "Given line ab calculate a point c, d distance behind a."
   [a b d]
-  (let [b (ga/- b a)]
-    (ga/+ a (vector-2d (- d) (:t b) :polar))))
+  (let [b (ga/- b a)
+        {:keys [r t]} (to-polar b)]
+    (ga/+ a (to-cartesian (- d) t))))
 
 (defn circle-circle-collision
   "Given two circles c1 with radius r1 and c2 with radius r2, return true if circles collide."
