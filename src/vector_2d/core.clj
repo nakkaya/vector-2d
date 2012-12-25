@@ -229,3 +229,7 @@
       (line-circle-collision b c cc r)
       (line-circle-collision c d cc r)
       (line-circle-collision d a cc r)))
+
+(defn angle-between-points [u v]
+  (let [{:keys [x y]} (ga/- u v)]
+    (/ (* 180 (Math/atan2 y x)) Math/PI)))
