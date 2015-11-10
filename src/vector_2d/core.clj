@@ -1,50 +1,47 @@
 (ns vector-2d.core
-  (:refer-clojure :exclude [deftype])
-  (:use [clojure.contrib.types :only (deftype)]
-	[clojure.contrib.generic :only (root-type)]
-        [clojure.contrib.seq-utils :only (find-first)])
-  (:require [clojure.contrib.generic.arithmetic :as ga]
-	    [clojure.contrib.generic.comparison :as gc]))
+  (:refer-clojure :exclude [+ - * =])
+  (:use [clojure.algo.generic :only (root-type)])
+  (:require [clojure.algo.generic.arithmetic :as ga]
+            [clojure.algo.generic.math-functions :as gmf]
+	    [clojure.algo.generic.comparison :as gc]))
 
-(defstruct vector-2d-struct :x :y)
+(defrecord Vector2D [x y] Object)
+(derive Vector2D root-type)
 
-(deftype ::vector-2d vector-2d
-  (fn [x y] (struct vector-2d-struct x y))
-  (fn [{x :x y :y}] (vector-2d x y)))
-
-(derive ::vector-2d root-type)
+(defn vector-2d [x y]
+  (new Vector2D x y))
 
 (defn to-polar [{x :x y :y}]
-  {:r (Math/sqrt (+ (* x x) (* y y))) :t (Math/atan2 y x)})
+  {:r (Math/sqrt (ga/+ (ga/* x x) (ga/* y y))) :t (Math/atan2 y x)})
 
 (defn to-cartesian [r t]
-  (vector-2d (* r (Math/cos t)) (* r (Math/sin t))))
+  (vector-2d (ga/* r (Math/cos t)) (ga/* r (Math/sin t))))
 
-(defmethod ga/+ [::vector-2d ::vector-2d]
+(defmethod ga/+ [Vector2D Vector2D]
   [{ux :x uy :y} {vx :x vy :y}]
   (vector-2d (ga/+ ux vx) (ga/+ uy vy)))
 
-(defmethod ga/- [::vector-2d ::vector-2d]
+(defmethod ga/- [Vector2D Vector2D]
   [{ux :x uy :y} {vx :x vy :y}]
   (vector-2d (ga/- ux vx) (ga/- uy vy)))
 
-(defmethod ga/* [::vector-2d Object]
+(defmethod ga/* [Vector2D root-type]
   [{ux :x uy :y} s]
-  (vector-2d (* ux s) (* uy s)))
+  (vector-2d (ga/* ux s) (ga/* uy s)))
 
-(defmethod gc/= [::vector-2d ::vector-2d]
+(defmethod gc/= [Vector2D Vector2D]
   [{ux :x uy :y} {vx :x vy :y}]
   (and (gc/= ux vx) (gc/= uy vy)))
 
 (defn negative 
   "Return a new vector in the opposite direction."
   [{ux :x uy :y}]
-  (vector-2d (- ux) (- uy)))
+  (vector-2d (ga/- ux) (ga/- uy)))
 
 (defn magnitude 
   "Return the length of the vector."
   [{x :x y :y}]
-  (Math/sqrt (+ (* x x) (* y y))))
+  (Math/sqrt (ga/+ (ga/* x x) (ga/* y y))))
 
 (defn dist 
   "Return the distance between two vectors."
@@ -54,7 +51,7 @@
 (defn dist-manhattan
   "Return the manhattan distance between two vectors."
   [{x1 :x y1 :y} {x2 :x y2 :y}]
-  (+ (Math/abs (- x2 x1)) (Math/abs (- y2 y1))))
+  (ga/+ (Math/abs (ga/- x2 x1)) (Math/abs (ga/- y2 y1))))
 
 (defn normalize 
   "Returns the unit vector of the supplied vector."
@@ -67,7 +64,7 @@
 (defn dot-product 
   "See, http://en.wikipedia.org/wiki/Dot_product"
   [{ux :x uy :y} {vx :x vy :y}]
-  (+ (* ux vx) (* uy vy)))
+  (ga/+ (ga/* ux vx) (ga/* uy vy)))
 
 (defn project 
   "See, http://en.wikipedia.org/wiki/Vector_projection"
@@ -81,8 +78,8 @@
   [{ux :x uy :y} angle]
   (let [s (Math/sin (Math/toRadians angle))
 	c (Math/cos (Math/toRadians angle))]
-    (vector-2d (- (ga/* c ux) (ga/* s uy)) 
-	       (+ (ga/* s ux) (ga/* c uy)))))
+    (vector-2d (ga/- (ga/* c ux) (ga/* s uy)) 
+	       (ga/+ (ga/* s ux) (ga/* c uy)))))
 
 (defn bisect-angle 
   "Returns the vector that lies halfway between vectors."
@@ -106,7 +103,7 @@
 (defn perpendicular? 
   "Returns true if vectors are perpendicular to each other."
   [u v]
-  (= 0 (Math/abs (dot-product u v))))
+  (gc/= 0 (Math/abs (dot-product u v))))
 
 (defn closest-point-on-line 
   "Calculate a point on the line AB that is closest to point C."
@@ -134,14 +131,14 @@
 (defn point-in-circle? 
   "Test if point a falls within the circle c with radius r."
   [{ax :x ay :y} {cx :x cy :y} r]
-  (gc/< (+ (Math/pow (- cx ax) 2) (Math/pow (- cy ay) 2)) (Math/pow r 2)))
+  (gc/< (ga/+ (Math/pow (ga/- cx ax) 2) (Math/pow (ga/- cy ay) 2)) (Math/pow r 2)))
 
 (defn bearing 
   "Direction of u with respect to v."
   [{ux :x uy :y} {vx :x vy :y}]
-  (let [ang (- (/ Math/PI 2) (Math/atan2 (- uy vy) (- ux vx)))] 
-    (cond (> ang Math/PI) (- ang (* 2 Math/PI))
-	  (< ang (- Math/PI)) (+ ang (* 2 Math/PI))
+  (let [ang (ga/- (/ Math/PI 2) (Math/atan2 (ga/- uy vy) (ga/- ux vx)))] 
+    (cond (> ang Math/PI) (ga/- ang (ga/* 2 Math/PI))
+	  (< ang (ga/- Math/PI)) (ga/+ ang (ga/* 2 Math/PI))
 	  :else ang)))
 
 (defn octant
@@ -150,9 +147,9 @@
   (let [{:keys [x y]} u
         {:keys [r t]} (to-polar u)
         angle (let [a (Math/toDegrees t)]
-                (if (< a 0) (+ 360 a) a))
+                (if (< a 0) (ga/+ 360 a) a))
         bounds [[1 45] [2 90] [3 135] [4 180] [5 225] [6 270] [7 315] [8 360]]]
-    (first (find-first #(< angle (second %)) bounds))))
+    (first (filter #(< angle (second %)) bounds))))
 
 (defn quadrant
   "Provides info on which quadrant (1-4) the vector lies in."
@@ -160,48 +157,48 @@
   (let [{:keys [x y]} u
         {:keys [r t]} (to-polar u)
         angle (let [a (Math/toDegrees t)]
-                (if (< a 0) (+ 360 a) a))
+                (if (< a 0) (ga/+ 360 a) a))
         bounds [[1 90] [2 180] [3 270] [4 360]]]
-    (first (find-first #(< angle (second %)) bounds))))
+    (first (filter #(< angle (second %)) bounds))))
 
 (defn distance-behind-line
   "Given line ab calculate a point c, d distance behind a."
   [a b d]
   (let [b (ga/- b a)
         {:keys [r t]} (to-polar b)]
-    (ga/+ a (to-cartesian (- d) t))))
+    (ga/+ a (to-cartesian (ga/- d) t))))
 
 (defn circle-circle-collision
   "Given two circles c1 with radius r1 and c2 with radius r2, return true if circles collide."
   [c1 r1 c2 r2]
-  (<= (dist c1 c2) (Math/sqrt (Math/pow (+ r1 r2) 2))))
+  (<= (dist c1 c2) (Math/sqrt (Math/pow (ga/+ r1 r2) 2))))
 
 (defn line-intersection
   "Given two line segments ab and cd returns the intersection point if they intersect otherwise nil.
-   http://paulbourke.net/geometry/lineline2d/"
+  http://paulbourke.net/geometry/lineline2d/"
   [{x1 :x y1 :y} {x2 :x y2 :y} {x3 :x y3 :y} {x4 :x y4 :y}]
   (when (and (not= (vector-2d x1 y1) (vector-2d x2 y2))
              (not= (vector-2d x3 y3) (vector-2d x4 y4)))
     
-    (let [ua (/ (- (* (- x4 x3) (- y1 y3))
-                   (* (- y4 y3) (- x1 x3)))
+    (let [ua (/ (ga/- (ga/* (ga/- x4 x3) (ga/- y1 y3))
+                      (ga/* (ga/- y4 y3) (ga/- x1 x3)))
                 
-                (- (* (- y4 y3) (- x2 x1))
-                   (* (- x4 x3) (- y2 y1))))
+                (ga/- (ga/* (ga/- y4 y3) (ga/- x2 x1))
+                      (ga/* (ga/- x4 x3) (ga/- y2 y1))))
           
-          ub (/ (- (* (- x2 x1) (- y1 y3))
-                   (* (- y2 y1) (- x1 x3)))
+          ub (/ (ga/- (ga/* (ga/- x2 x1) (ga/- y1 y3))
+                      (ga/* (ga/- y2 y1) (ga/- x1 x3)))
                 
-                (- (* (- y4 y3) (- x2 x1))
-                   (* (- x4 x3) (- y2 y1))))]
+                (ga/- (ga/* (ga/- y4 y3) (ga/- x2 x1))
+                      (ga/* (ga/- x4 x3) (ga/- y2 y1))))]
       
       (when (and (>= ua 0)
                  (<= ua 1)
                  (>= ub 0)
                  (<= ub 1))
         
-        (vector-2d (+ x1 (* ua (- x2 x1)))
-                   (+ y1 (* ua (- y2 y1))))))))
+        (vector-2d (ga/+ x1 (ga/* ua (ga/- x2 x1)))
+                   (ga/+ y1 (ga/* ua (ga/- y2 y1))))))))
 
 (defn- in-range? [x a b]
   (cond (< x a) false
@@ -210,7 +207,7 @@
 
 (defn point-in-rectangle
   "Given corners of a rectangle a,b,c,d and a point p,
-   returns true if p in the rectangle,"
+  returns true if p in the rectangle,"
   [a b c d p]
   (let [min-x (apply min (map #(:x %) [a b c d]))
         max-x (apply max (map #(:x %) [a b c d]))
@@ -221,8 +218,8 @@
 
 (defn rectangle-circle-collision
   "Given corners of a rectangle a,b,c,d and a circle with
-   center cc with radius r return true if circle collides with the
-   rectangle."
+  center cc with radius r return true if circle collides with the
+  rectangle."
   [[a b c d] cc r]
   (or (point-in-rectangle a b c d cc)
       (line-circle-collision a b cc r)
@@ -232,4 +229,4 @@
 
 (defn angle-between-points [u v]
   (let [{:keys [x y]} (ga/- v u)]
-    (/ (* 180 (Math/atan2 y x)) Math/PI)))
+    (/ (ga/* 180 (Math/atan2 y x)) Math/PI)))
