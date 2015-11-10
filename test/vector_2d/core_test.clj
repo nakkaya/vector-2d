@@ -19,9 +19,11 @@
     (is (= 1.4142135623730951 (magnitude u)))
     (is (= 2.0 (dist (vector-2d 0 0) (vector-2d 2 0))))
     (is (= (vector-2d 0.7071067811865475 0.7071067811865475) (normalize u)))
-    (is (= 2 (dot-product u u)))
-    (is (= (vector-2d 0.9999999999999998 0.9999999999999998)
-           (project (vector-2d 1 1) (vector-2d 10 10))))
+    (is (= 2.0 (dot-product u u)))
+    (is (= "1.00"
+           (format "%.2f" (-> (project (vector-2d 1 1) (vector-2d 10 10)) :x))))
+    (is (= "1.00"
+           (format "%.2f" (-> (project (vector-2d 1 1) (vector-2d 10 10)) :y))))
     (is (= (vector-2d 6.123233995736766E-17 1.0)
            (rotate (vector-2d 1 0) 90)))
     (is (= (vector-2d 5.0 0.0)
@@ -48,8 +50,8 @@
         		       (vector-2d 1 1) 74 (vector-2d 3 2))))
     (is (= true (point-in-circle? (vector-2d 1 1) (vector-2d 0 0) 10)))
     (is (= false (point-in-circle? (vector-2d 11 11) (vector-2d 0 0) 10)))
-    (is (= 180 (Math/toDegrees (bearing (vector-2d 0 0) (vector-2d 0 2)))))
-    (is (= -135 (Math/toDegrees 
+    (is (= 180.0 (Math/toDegrees (bearing (vector-2d 0 0) (vector-2d 0 2)))))
+    (is (= -135.0 (Math/toDegrees 
         	 (bearing (vector-2d 0 0) (vector-2d 1 1)))))
     (is (= (vector-2d 1 0) (closest-point-on-circle (vector-2d 2 0) (vector-2d 0 0) 1)))
     (is (= (vector-2d -10 0) (distance-behind-line (vector-2d 0 0) (vector-2d 10 0) 10)))

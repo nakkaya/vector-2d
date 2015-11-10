@@ -9,7 +9,7 @@
 (derive Vector2D root-type)
 
 (defn vector-2d [x y]
-  (new Vector2D x y))
+  (new Vector2D (float x) (float y)))
 
 (defn to-polar [{x :x y :y}]
   {:r (Math/sqrt (ga/+ (ga/* x x) (ga/* y y))) :t (Math/atan2 y x)})
@@ -103,7 +103,7 @@
 (defn perpendicular? 
   "Returns true if vectors are perpendicular to each other."
   [u v]
-  (gc/= 0 (Math/abs (dot-product u v))))
+  (gc/= 0.0 (Math/abs (dot-product u v))))
 
 (defn closest-point-on-line 
   "Calculate a point on the line AB that is closest to point C."
