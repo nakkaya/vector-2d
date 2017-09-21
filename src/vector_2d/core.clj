@@ -213,7 +213,7 @@
         max-x (apply max (map #(:x %) [a b c d]))
         min-y (apply min (map #(:y %) [a b c d]))
         max-y (apply max (map #(:y %) [a b c d]))]
-    (and (in-range? (:x p) min-x max-y)
+    (and (in-range? (:x p) min-x max-x)
          (in-range? (:y p) min-y max-y))))
 
 (defn rectangle-circle-collision
